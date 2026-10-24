@@ -15,6 +15,8 @@ define('KSC_DEMO_FOOTER', (($_SERVER['HTTP_HOST'] ?? '') === 'proto.exbridge.jp'
   . '<a class="btn" href="https://exbridge.jp/ai-it-komon.html#ref=kseccheck-demo">AI-IT顧問（点検と直しを引き受けます）</a>'
   . '<a class="btn" href="https://exbridge.jp/ai-sns-komon.html#ref=kseccheck-demo">AI-SNS顧問（ホームページとX）</a></div></div>'
   . '<script src=https://kurage.exbridge.jp/partner-bar.js defer></script>'
+  // 計測は proto の他のデモと同じく kurage.exbridge.jp/simpletrack.php に集約（2026-10-25。入れ忘れていて流入が測れなかった）
+  . "<script>(function(){var s=document.createElement('script');s.src='https://kurage.exbridge.jp/simpletrack.php?url='+encodeURIComponent(location.href)+'&ref='+encodeURIComponent(document.referrer);s.async=true;document.head.appendChild(s)})();</script>"
   : '');
 
 /** 点数のすぐ下に出す案内（デモだけ）。$visitor は結果ページを開いた人が診断した本人でない可能性があるとき true。 */
