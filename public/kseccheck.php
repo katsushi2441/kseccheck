@@ -355,10 +355,12 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
       <p class="lead"><?= $is_result ? '外から見える守りの弱さを、重い順に並べました（' . ksc_h(date('Y年n月j日 H:i', (int)$result['checked_at'])) . '時点）。' : 'https と証明書、ブラウザへの守りの指示、PHP・WordPress・jQuery などの古い版、入力欄の送り先を調べ、直し方を重い順に出します。' ?></p>
     </div>
   </div>
-  <?php $ptext = $is_result ? ksc_share_text($result) : KSC_TITLE . '｜URLを入れるだけで、ホームページの外から見える守りを診断できます'; $purl = $page_url; ?>
+  <?php // 共有・コピーは、システム名と概要の文をURLと一緒に渡す（URLだけでは何のページか伝わらない）
+  $ptext = $is_result ? ksc_share_text($result) : '【' . KSC_TITLE . "】\nURLを入れるだけで、ホームページの外から見える守りを診断するシステムです。https と証明書、ブラウザへの守りの設定、古いPHP・WordPress・jQuery、入力欄の送り先を調べ、直し方を重い順に出します。\n#セキュリティ #情報漏洩対策";
+  $purl = $page_url; ?>
   <div class="pshare">
     <a class="btn xb" target="_blank" rel="noopener" href="https://x.com/intent/post?<?= ksc_h(http_build_query(['text' => $ptext, 'url' => $purl . '#ref=x-share-ksc'])) ?>">𝕏 Xで共有</a>
-    <button class="btn cp" type="button" data-copy="<?= ksc_h($purl) ?>">URLをコピー</button>
+    <button class="btn cp" type="button" data-copy="<?= ksc_h($ptext . "\n" . $purl . '#ref=copy-ksc') ?>">紹介文とURLをコピー</button>
     <span class="ok" hidden>コピーしました</span>
   </div>
 
