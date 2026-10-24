@@ -1,5 +1,6 @@
 <?php
 // デモ（https://proto.exbridge.jp/kseccheck/）の設定。配布物の kseccheck_config.php.example は触らない。
+if (is_file(__DIR__ . '/kseccheck_pro_local.php')) { require_once __DIR__ . '/kseccheck_pro_local.php'; }   // Pro の接続先と鍵（git 外）
 define('KSC_TITLE', 'Kurage Security Check');
 define('KSC_PASSWORD_HASH', '');          // デモは鍵なし
 define('KSC_CACHE_HOURS', 6);

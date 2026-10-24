@@ -24,6 +24,7 @@ if (!defined('KSC_OG_IMAGE'))       { define('KSC_OG_IMAGE', ''); }         // �
 if (!defined('KSC_DEMO_FOOTER'))    { define('KSC_DEMO_FOOTER', ''); }      // デモだけで出す案内（HTML）
 
 require_once __DIR__ . '/kseccheck_engine.php';
+require_once __DIR__ . '/kseccheck_pro.php';   // Pro との接続（設定が無ければ何もしない）
 
 date_default_timezone_set('Asia/Tokyo');
 @set_time_limit(120);
@@ -180,9 +181,15 @@ if (isset($_GET['og'])) {
     readfile($png);
     exit;
 }
+$pro_vmsg = null;
 if (isset($_GET['r'])) {
     $result = ksc_load((string)$_GET['r']);
     if ($result) { $share = true; } else { http_response_code(404); $error = 'この診断結果は見つかりませんでした（30日を過ぎた結果は消えます）。もう一度診断してください。'; }
+    // Pro: 所有の確かめ（結果ページのボタン）。契約が無ければ何も起きない
+    if ($result && $authed && isset($_POST['pro_verify']) && ksc_pro_enabled()) {
+        $pro_vmsg = ksc_pro_verify((string)parse_url((string)$result['url'], PHP_URL_HOST), $_POST['pro_verify'] === 'check' ? 'check' : 'start');
+        if ($pro_vmsg) { $pro_vmsg['checked'] = $_POST['pro_verify'] === 'check'; }
+    }
 }
 
 $url_in = trim((string)($_GET['url'] ?? $_POST['url'] ?? ''));
@@ -199,6 +206,7 @@ if ($authed && $url_in !== '' && !$share) {
             $result = $cached;
         } else {
             $result = ksc_run($checked);
+            $result = ksc_pro_attach($result);   // 契約中で所有を確かめたドメインなら Pro の点検が付く
             if (empty($result['error'])) { $result['token'] = ksc_save($result); }
         }
         if ($result && empty($result['error']) && ($_GET['format'] ?? '') === 'md') {
@@ -206,6 +214,7 @@ if ($authed && $url_in !== '' && !$share) {
             header('Content-Type: text/markdown; charset=UTF-8');
             header('Content-Disposition: attachment; filename="kseccheck-' . $h . '-' . date('Ymd', (int)$result['checked_at']) . '.md"');
             echo ksc_markdown($result);
+            if (!empty($result['pro'])) { echo ksc_pro_md($result['pro']); }
             exit;
         }
         // 結果は番号付きのページで見せる（共有も印刷もそのURLで）
@@ -267,6 +276,7 @@ $desc = 'URLを入れるだけで、ホームページの外から見える守�
 <?php endif; ?>
 <link rel="icon" href="ksc_assets/logo.png">
 <style>
+<?= KSC_PRO_CSS ?>
 :root{--ink:#1b2a3a;--muted:#5d6b7a;--paper:#f4f7fb;--line:#dde5ef;--navy:#1f4e8c;--navy-d:#163a69;--teal:#0a9a8f;--teal-d:#076f67;--red:#c0392b;--gold:#8a5a00}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;line-height:1.8;font-size:16px}
@@ -402,6 +412,8 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
   </div>
 
   <?php $fa = $result['facts']; ?>
+  <?= ksc_pro_section($result, $pro_vmsg) ?>
+
   <h2>見えた情報</h2>
   <div class="box facts">
     <div><b>http で開いたとき：</b><?= ksc_h(implode(' → ', $fa['http_hops'] ?? [])) ?></div>

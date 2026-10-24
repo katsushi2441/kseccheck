@@ -55,3 +55,7 @@ https と証明書、ブラウザへの守りの指示、サポートの切れ�
 MIT License。カード画像の文字は Noto Sans CJK JP の切り出し（SIL OFL 1.1・`public/ksc_assets/OFL.txt`）。
 
 提供: 株式会社エクスブリッジ <https://exbridge.jp/>
+
+## Pro（AI-IT顧問・AI-SNS顧問の契約中だけ）
+
+設定に `KSC_PRO_URL` と `KSC_PRO_KEY` を書くと、**所有を確かめたドメインだけ**に、https の設定の詳しい読み取り（SSLyze）、脆弱性一覧（retire.js）による部品の照合、WordPress のプラグインの版の照合が足されます。所有は、決まった場所のファイルか DNS の TXT で確かめます。契約が終わると鍵が止まり、画面は自動でノーマル版に戻ります。

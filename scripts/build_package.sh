@@ -4,7 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 out=outputs/kurage-security-check.zip; tmp=$(mktemp -d); d="$tmp/kurage-security-check"
 mkdir -p "$d/ksc_data" "$d/ksc_assets" "$d/scripts"
-cp public/kseccheck.php public/kseccheck_engine.php public/kseccheck_config.php.example "$d/"
+cp public/kseccheck.php public/kseccheck_engine.php public/kseccheck_pro.php public/kseccheck_config.php.example "$d/"
 cp public/ksc_data/.htaccess "$d/ksc_data/"
 cp public/ksc_assets/{ksc-card-bold.otf,ksc-card-black.otf,mascot.png,logo.png,OFL.txt} "$d/ksc_assets/"
 cp scripts/check.php scripts/make_password_hash.php "$d/scripts/"
