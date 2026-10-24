@@ -103,9 +103,10 @@ function ksc_share_text(array $r): string
 {
     $s = $r['score'];
     $host = str_replace('.', '．', ksc_host($r));   // 半角の「.」だと X がリンクにしてそのサイトのカードを出す
+    $pro = !empty($r['pro']) ? '・Pro ' . (int)$r['pro']['score'] . '点（https の設定・部品の脆弱性・プラグインの版）' : '';
     return '【' . KSC_TITLE . "】\n" . $host . ' の外から見える守りを診断しました'
-        . "\n総合 " . $s['overall'] . '点（' . ksc_band((int)$s['overall']) . '）・重大 ' . $s['count']['critical'] . '件・警告 ' . $s['count']['warning'] . '件'
-        . "\nURLを入れるだけで、https・守りの設定・古い部品をチェックできます\n#セキュリティ #情報漏洩対策";
+        . "\n総合 " . $s['overall'] . '点（' . ksc_band((int)$s['overall']) . '）・重大 ' . $s['count']['critical'] . '件・警告 ' . $s['count']['warning'] . '件' . $pro
+        . "\nURLを入れるだけで、https・守りの設定・古い部品をチェックできます" . (ksc_pro_status() ? "\n" . ksc_pro_summary_line() : '') . "\n#セキュリティ #情報漏洩対策";
 }
 
 /** 結果カード（1200×630のPNG）。文字は ksc_assets/ の切り出しフォント（scripts/make_card_fonts.py）。 */
@@ -366,7 +367,7 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
     </div>
   </div>
   <?php // 共有・コピーは、システム名と概要の文をURLと一緒に渡す（URLだけでは何のページか伝わらない）
-  $ptext = $is_result ? ksc_share_text($result) : '【' . KSC_TITLE . "】\nURLを入れるだけで、ホームページの外から見える守りを診断するシステムです。https と証明書、ブラウザへの守りの設定、古いPHP・WordPress・jQuery、入力欄の送り先を調べ、直し方を重い順に出します。\n#セキュリティ #情報漏洩対策";
+  $ptext = $is_result ? ksc_share_text($result) : '【' . KSC_TITLE . "】\nURLを入れるだけで、ホームページの外から見える守りを診断するシステムです。https と証明書、ブラウザへの守りの設定、古いPHP・WordPress・jQuery、入力欄の送り先を調べ、直し方を重い順に出します。" . (ksc_pro_status() ? "\n" . ksc_pro_summary_line() : '') . "\n#セキュリティ #情報漏洩対策";
   $purl = $page_url; ?>
   <div class="pshare">
     <a class="btn xb" target="_blank" rel="noopener" href="https://x.com/intent/post?<?= ksc_h(http_build_query(['text' => $ptext, 'url' => $purl . '#ref=x-share-ksc'])) ?>">𝕏 Xで共有</a>
@@ -389,6 +390,7 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
     <div><b>版の見えすぎ・古い部品</b>サポートの切れた PHP、古い WordPress、既知の脆弱性がある jQuery・Bootstrap など</div>
     <div><b>ページと入力欄</b>入力欄の送り先、暗号化されない部品の読み込み、エラー表示、連絡先（security.txt）</div>
   </div>
+  <?= ksc_pro_landing_html($self) ?>
   <div class="box"><b>攻撃に近い検査はしません。</b>ふつうの訪問者がページを開くのと同じ範囲だけを見ます。管理画面を探す、パスワードを試す、隠しファイルを探すといったことはしないので、他社のサイトに使っても相手のサーバーに負担や害を与えません。そのぶん、サーバーの中の設定やプラグインごとの脆弱性は分かりません。判定に生成AIは使わないので、同じ状態なら何度測っても同じ結果になります。</div>
 <?php else: $s = $result['score']; $cls = fn($v) => $v >= 80 ? 'c-good' : ($v >= 60 ? 'c-mid' : ($v >= 40 ? 'c-gold' : 'c-bad')); ?>
   <p class="note">対象：<a href="<?= ksc_h($result['facts']['final_url'] ?? $result['url']) ?>" rel="nofollow noopener" target="_blank"><?= ksc_h($result['facts']['final_url'] ?? $result['url']) ?></a></p>

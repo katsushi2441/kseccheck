@@ -12,6 +12,47 @@ declare(strict_types=1);
 
 if (!defined('KSC_PRO_URL')) { define('KSC_PRO_URL', ''); }   // 例: https://exbridge.ddns.net:18394
 if (!defined('KSC_PRO_KEY')) { define('KSC_PRO_KEY', ''); }   // 契約ごとの鍵（kscp_…）
+if (!defined('KSC_PRO_DEMO')) { define('KSC_PRO_DEMO', false); } // デモ: 所有の確かめのボタンを出さず、条件の案内と当社サイトの見本だけ出す
+if (!defined('KSC_PRO_CONTACT')) { define('KSC_PRO_CONTACT', 'https://exbridge.jp/ai-it-komon.html'); }
+
+/** Pro の機能と、導入できる条件（デモ・導入版の画面・共有の文で同じ文言を使う）。 */
+function ksc_pro_features(): array
+{
+    return [
+        ['https の設定の詳しい読み取り', '受け付ける暗号の方式、弱い組み合わせ、証明書の検証と並び順（SSLyze）'],
+        ['部品の脆弱性の照合', '読み込んでいる jQuery・Bootstrap などの版を、脆弱性の一覧（retire.js）と突き合わせる'],
+        ['WordPress プラグインの版の照合', 'ページに見えるプラグインの版を、WordPress.org の最新版と比べる'],
+        ['前回との差', '点検の履歴を残し、直った指摘・新しく出た指摘を出す'],
+    ];
+}
+function ksc_pro_conditions(): array
+{
+    return [
+        'AI-IT顧問・AI-SNS顧問（月15時間）の契約中は、Pro の点検が顧問契約に含まれます',
+        'Pro の点検は当社のサーバーで動き、契約中だけ使えます。契約が終わると自動でノーマル版に戻ります',
+        'Pro を自社のサーバーに置く形は、契約中に顧問の時間で設置でき、契約後もそのまま使えます',
+        'Pro の点検は、所有を確かめた自社のドメインだけにかかります（ファイルか DNS の TXT で確かめます）',
+    ];
+}
+function ksc_pro_summary_line(): string
+{
+    return 'Pro では、所有を確かめた自社のドメインに、https の設定の詳しい読み取り・脆弱性一覧による部品の照合・WordPress プラグインの版の照合を足し、前回との差も出します。Pro は AI-IT顧問・AI-SNS顧問の契約中に使えます。';
+}
+/** 入口のページに出す Pro の案内（契約中の画面だけ）。 */
+function ksc_pro_landing_html(string $self): string
+{
+    if (!ksc_pro_status()) { return ''; }
+    $e = fn($x) => htmlspecialchars((string)$x, ENT_QUOTES, 'UTF-8');
+    $o = '<section class="pro" aria-label="Pro の機能と条件"><h2>Pro の点検 <span class="probadge">Pro</span></h2>'
+       . '<p>ノーマル版の4分野に加えて、<b>所有を確かめた自社のドメイン</b>には次の点検が付きます。</p><div class="what">';
+    foreach (ksc_pro_features() as [$t, $d]) { $o .= '<div><b>' . $e($t) . '</b>' . $e($d) . '</div>'; }
+    $o .= '</div><h3 style="font-size:16px;margin:14px 0 6px">導入できる条件</h3><ul style="margin:0 0 10px;padding-left:22px">';
+    foreach (ksc_pro_conditions() as $c) { $o .= '<li>' . $e($c) . '</li>'; }
+    $o .= '</ul><div class="actions">'
+        . '<form method="get" action="' . $e($self) . '" style="display:inline"><input type="hidden" name="url" value="https://exbridge.jp/"><button class="btn main" type="submit">当社のサイトで Pro の結果を見る</button></form>'
+        . '<a class="btn" href="' . $e(KSC_PRO_CONTACT) . '#ref=kseccheck-pro">AI-IT顧問（Pro が使える契約）</a></div></section>';
+    return $o;
+}
 
 function ksc_pro_enabled(): bool { return KSC_PRO_URL !== '' && KSC_PRO_KEY !== '' && function_exists('curl_init'); }
 
@@ -141,6 +182,11 @@ function ksc_pro_section(array $result, ?array $vmsg): string
         $o .= '</div>';
     } elseif (ksc_pro_domain_verified($st, $host)) {
         $o .= '<p class="note">このドメインは所有を確かめてあります。「いま測り直す」を押すと、Pro の点検が付きます。</p>';
+    } elseif (KSC_PRO_DEMO) {
+        $o .= '<p>Pro の点検は、所有を確かめた自社のドメインだけにかけます。このデモでは、当社のサイトで Pro の結果をご覧いただけます。</p><ul style="margin:0 0 10px;padding-left:22px">';
+        foreach (ksc_pro_conditions() as $c) { $o .= '<li>' . $e($c) . '</li>'; }
+        $o .= '</ul><div class="actions"><form method="get" action="' . $e(ksc_self()) . '" style="display:inline"><input type="hidden" name="url" value="https://exbridge.jp/"><button class="btn main" type="submit">当社のサイトで Pro の結果を見る</button></form>'
+            . '<a class="btn" href="' . $e(KSC_PRO_CONTACT) . '#ref=kseccheck-pro">AI-IT顧問（Pro が使える契約）</a></div>';
     } else {
         $o .= '<p>Pro の点検は、所有を確かめたドメインだけにかけます。' . $e($host) . ' が御社のサイトなら、次のどちらかで所有を確かめてください。</p>';
         if ($vmsg && !empty($vmsg['token'])) {

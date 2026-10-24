@@ -8,7 +8,9 @@ import pathlib
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUT = ROOT / "demo" / "kseccheck-ogp.png"
+import sys
+PRO = "--pro" in sys.argv
+OUT = ROOT / "demo" / ("kseccheck-pro-ogp.png" if PRO else "kseccheck-ogp.png")
 
 
 def data_uri(path, mime):
@@ -36,15 +38,16 @@ h1 em{{font-style:normal;color:#1f4e8c}}
 .foot img{{width:34px;height:34px}}
 </style></head><body><div class="top"></div>
 <div class="l">
-  <div class="name">Kurage Security Check</div>
+  <div class="name">Kurage Security Check{" Pro" if PRO else ""}</div>
   <h1>URLを入れるだけで、<br><em>ホームページの守り</em>を診断</h1>
   <div class="chips">
     <div><b>暗号化</b><span>https・証明書</span></div>
     <div><b>守りの指示</b><span>CSP・HSTSなど</span></div>
     <div><b>古い部品</b><span>PHP・WordPress・jQuery</span></div>
     <div><b>入力欄</b><span>送り先・エラー表示</span></div>
+    {'<div style="border-color:#7a3fa8"><b style="color:#7a3fa8">Pro</b><span>https設定の詳細・部品の脆弱性・プラグイン</span></div>' if PRO else ""}
   </div>
-  <div class="sub">攻撃に近い検査はしない／PHPだけで動く</div>
+  <div class="sub">{"Pro は AI-IT顧問・AI-SNS顧問の契約中に" if PRO else "攻撃に近い検査はしない／PHPだけで動く"}</div>
 </div>
 <img class="m" src="{MASCOT}">
 <div class="foot"><img src="{LOGO}">株式会社エクスブリッジ</div>
