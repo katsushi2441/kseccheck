@@ -34,6 +34,25 @@ function ksc_pro_conditions(): array
         'Pro の点検は、所有を確かめた自社のドメインだけにかかります（ファイルか DNS の TXT で確かめます）',
     ];
 }
+/** Pro が使っている OSS（名前・役割・ライセンス・公式）。画面・診断書・出品の本文で同じ一覧を出す。 */
+function ksc_pro_oss(): array
+{
+    return [
+        ['SSLyze', 'https の設定の読み取り（受け付ける暗号の方式・証明書の検証）。別のコマンドとして呼び、結果だけを受け取ります', 'AGPL-3.0', 'https://github.com/nabla-c0d3/sslyze'],
+        ['retire.js（脆弱性の一覧）', '読み込んでいる JavaScript の部品の版と、既知の脆弱性の一覧を突き合わせます。一覧は毎日取り直します', 'Apache-2.0', 'https://github.com/RetireJS/retire.js'],
+        ['dnspython', '所有の確かめ（DNS の TXT レコードの読み取り）', 'ISC', 'https://github.com/rthalley/dnspython'],
+        ['FastAPI', 'Pro のサーバーの受け口', 'MIT', 'https://github.com/fastapi/fastapi'],
+    ];
+}
+function ksc_pro_oss_html(): string
+{
+    $e = fn($x) => htmlspecialchars((string)$x, ENT_QUOTES, 'UTF-8');
+    $o = '<div class="box" style="margin-top:12px"><b>Pro が使っているオープンソース</b><ul style="margin:6px 0 0;padding-left:22px;font-size:14px">';
+    foreach (ksc_pro_oss() as [$n, $role, $lic, $url]) {
+        $o .= '<li><a href="' . $e($url) . '" rel="noopener" target="_blank">' . $e($n) . '</a>（' . $e($lic) . '）：' . $e($role) . '</li>';
+    }
+    return $o . '</ul><p class="note" style="margin:6px 0 0">WordPress プラグインの版は、WordPress.org の公開 API と比べます。</p></div>';
+}
 function ksc_pro_summary_line(): string
 {
     return 'Pro では、所有を確かめた自社のドメインに、https の設定の詳しい読み取り・脆弱性一覧による部品の照合・WordPress プラグインの版の照合を足し、前回との差も出します。Pro は AI-IT顧問・AI-SNS顧問の契約中に使えます。';
@@ -48,7 +67,7 @@ function ksc_pro_landing_html(string $self): string
     foreach (ksc_pro_features() as [$t, $d]) { $o .= '<div><b>' . $e($t) . '</b>' . $e($d) . '</div>'; }
     $o .= '</div><h3 style="font-size:16px;margin:14px 0 6px">導入できる条件</h3><ul style="margin:0 0 10px;padding-left:22px">';
     foreach (ksc_pro_conditions() as $c) { $o .= '<li>' . $e($c) . '</li>'; }
-    $o .= '</ul><div class="actions">'
+    $o .= '</ul>' . ksc_pro_oss_html() . '<div class="actions">'
         . '<form method="get" action="' . $e($self) . '" style="display:inline"><input type="hidden" name="url" value="https://exbridge.jp/"><button class="btn main" type="submit">当社のサイトで Pro の結果を見る</button></form>'
         . '<a class="btn" href="' . $e(KSC_PRO_CONTACT) . '#ref=kseccheck-pro">AI-IT顧問（Pro が使える契約）</a></div></section>';
     return $o;
@@ -137,6 +156,9 @@ function ksc_pro_md(array $p): string
         $o[] = '- 直し方: ' . $x['fix'];
     }
     if (empty($p['findings'])) { $o[] = ''; $o[] = 'Pro の点検では問題は見つかりませんでした。'; }
+    $o[] = ''; $o[] = '### Pro が使っているオープンソース';
+    foreach (ksc_pro_oss() as [$n, $role, $lic, $url]) { $o[] = '- ' . $n . '（' . $lic . '）: ' . $role . ' ' . $url; }
+    $o[] = '- WordPress プラグインの版は WordPress.org の公開 API と比べます';
     return implode("\n", $o);
 }
 
@@ -179,7 +201,7 @@ function ksc_pro_section(array $result, ?array $vmsg): string
                 . '<div class="e">実測：' . $e($x['evidence']) . '</div><div class="a">直し方：' . $e($x['fix']) . '</div></div>';
         }
         if (empty($p['findings'])) { $o .= '<div class="item">Pro の点検では問題は見つかりませんでした。</div>'; }
-        $o .= '</div>';
+        $o .= '</div>' . ksc_pro_oss_html();
     } elseif (ksc_pro_domain_verified($st, $host)) {
         $o .= '<p class="note">このドメインは所有を確かめてあります。「いま測り直す」を押すと、Pro の点検が付きます。</p>';
     } elseif (KSC_PRO_DEMO) {
