@@ -152,9 +152,9 @@ function ksc_card_png(array $r): string
     foreach (ksc_categories() as $k => $_) {
         $x = 432 + ($i % 2) * 300; $y = 200 + intdiv($i, 2) * 112;
         $round($x, $y, $x + 280, $y + 96, 18, $white, $line);
-        $text(19, $x + 20, $y + 40, $muted, $B, $short[$k]);
+        $text(17, $x + 18, $y + 34, $muted, $B, $short[$k]);
         $v = (int)$s['categories'][$k];
-        $text(40, $x + 260, $y + 80, $v >= 80 ? $teal : ($v >= 50 ? $navy : $red), $K, (string)$v, 'r');
+        $text(38, $x + 262, $y + 84, $v >= 80 ? $teal : ($v >= 50 ? $navy : $red), $K, (string)$v, 'r');
         $i++;
     }
     $cnt = '重大 ' . $s['count']['critical'] . '件　警告 ' . $s['count']['warning'] . '件　改善余地 ' . $s['count']['info'] . '件';
