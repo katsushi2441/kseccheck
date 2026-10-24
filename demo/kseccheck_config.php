@@ -9,7 +9,8 @@ define('KSC_OG_IMAGE', 'https://proto.exbridge.jp/kseccheck/kseccheck-ogp.png');
 define('KSC_DEMO_FOOTER', (($_SERVER['HTTP_HOST'] ?? '') === 'proto.exbridge.jp')
   ? '<div class="demo box" style="margin-top:28px"><b>これはデモです。</b>'
   . 'このシステムは、御社のレンタルサーバーにPHPを置くだけで動きます（データベース不要）。社内のサイトや取引先の点検に、自社の中で使えます。'
-  . '<div class="actions"><a class="btn main" href="https://exbridge.jp/ai-it-komon.html#ref=kseccheck-demo">AI-IT顧問（点検と直しを引き受けます）</a>'
+  . '<div class="actions"><a class="btn main" href="https://kappstore.exbridge.jp/app.php?id=a96e95e176b48800&amp;ref=kseccheck-demo">導入版（Kurage App Store）</a>'
+  . '<a class="btn" href="https://exbridge.jp/ai-it-komon.html#ref=kseccheck-demo">AI-IT顧問（点検と直しを引き受けます）</a>'
   . '<a class="btn" href="https://exbridge.jp/ai-sns-komon.html#ref=kseccheck-demo">AI-SNS顧問（ホームページとX）</a></div></div>'
   . '<script src=https://kurage.exbridge.jp/partner-bar.js defer></script>'
   : '');
