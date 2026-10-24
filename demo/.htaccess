@@ -1,0 +1,3 @@
+AddHandler php8.3-script .php
+AddDefaultCharset UTF-8
+DirectoryIndex index.php

@@ -1,0 +1,3 @@
+public/ksc_data/*
+!public/ksc_data/.htaccess
+public/kseccheck_config.php

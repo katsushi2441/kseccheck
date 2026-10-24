@@ -1,0 +1,14 @@
+<?php
+/**
+ * Kurage Security Check の設定。kseccheck_config.php という名前にコピーして編集してください。
+ */
+define('KSC_TITLE', 'Kurage Security Check');
+// 社外から見える場所に置くなら、パスワードを設定してください。ハッシュは scripts/make_password_hash.php で作れます。
+define('KSC_PASSWORD_HASH', '');
+define('KSC_CACHE_HOURS', 6);        // 同じURLの結果を使い回す時間
+define('KSC_RATE_PER_HOUR', 20);     // 1つのIPから1時間に新しく診断できる回数（0で無制限）
+define('KSC_KEEP_DAYS', 30);         // 結果ページを残す日数
+define('KSC_CANONICAL', '');         // 公開URL（例: https://example.co.jp/kseccheck/kseccheck.php）
+define('KSC_OG_IMAGE', '');          // 入口のOGP画像のURL（1200×630）
+// define('KSC_WP_LATEST', '7.1');   // WordPress の新しい版の系列。これより大きく遅れた版を「古い」とする
+// define('KSC_ALLOW_PRIVATE', false); // 社内サイトを診断するときだけ true。外部に公開する場所では絶対に true にしない
