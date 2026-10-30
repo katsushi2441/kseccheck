@@ -3,6 +3,7 @@
 if (is_file(__DIR__ . '/kseccheck_pro_local.php')) { require_once __DIR__ . '/kseccheck_pro_local.php'; }   // Pro の接続先と鍵（git 外）
 define('KSC_TITLE', 'Kurage Security Check Pro');   // デモは Pro 版（当社の契約の鍵で動く・所有確認は当社ドメインだけ）
 define('KSC_PRO_DEMO', true);
+define('KSC_LITE', true);                 // デモ版は点数と件数だけ（直すこと・見えた情報・診断書は出さない。2026-10-30 ユーザー指示）
 define('KSC_PASSWORD_HASH', '');          // デモは鍵なし
 define('KSC_CACHE_HOURS', 6);
 define('KSC_RATE_PER_HOUR', 10);          // デモは1つのIPから1時間に10回まで
@@ -29,7 +30,7 @@ function ksc_demo_after_score(array $r, bool $visitor): string
   $ref = $visitor ? 'ksc-share-komon' : 'ksc-result-komon';
   if ($n > 0) {
     $h = 'この' . $n . '件の直し、AI-IT顧問の時間の中で引き受けます';
-    $lead = '重大 ' . (int)$c['critical'] . '件・警告 ' . (int)$c['warning'] . '件が見つかりました。下の「直すこと」を、AIを使って短い時間で直し、この診断で測り直して点数で確かめます。'
+    $lead = '重大 ' . (int)$c['critical'] . '件・警告 ' . (int)$c['warning'] . '件が見つかりました。どこを直すかをお伝えし、AIを使って短い時間で直し、この診断で測り直して点数で確かめます。'
       . 'この診断では見えないサーバーの中の設定や、WordPressのプラグイン、PHPの更新まで点検します。';
   } else {
     $h = '外から見える守りは整っています。次は中の点検です';

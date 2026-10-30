@@ -22,6 +22,7 @@ if (!defined('KSC_KEEP_DAYS'))      { define('KSC_KEEP_DAYS', 30); }        // �
 if (!defined('KSC_CANONICAL'))      { define('KSC_CANONICAL', ''); }        // 公開URL（設定するとcanonical・OGPを出す）
 if (!defined('KSC_OG_IMAGE'))       { define('KSC_OG_IMAGE', ''); }         // 入口のOGP画像のURL（1200×630）
 if (!defined('KSC_DEMO_FOOTER'))    { define('KSC_DEMO_FOOTER', ''); }      // デモだけで出す案内（HTML）
+if (!defined('KSC_LITE'))           { define('KSC_LITE', false); }          // true で点数と件数だけを出す（直すこと・見えた情報・診断書を出さない。デモ版用）
 
 require_once __DIR__ . '/kseccheck_engine.php';
 require_once __DIR__ . '/kseccheck_pro.php';   // Pro との接続（設定が無ければ何もしない）
@@ -210,7 +211,7 @@ if ($authed && $url_in !== '' && !$share) {
             $result = ksc_pro_attach($result);   // 契約中で所有を確かめたドメインなら Pro の点検が付く
             if (empty($result['error'])) { $result['token'] = ksc_save($result); }
         }
-        if ($result && empty($result['error']) && ($_GET['format'] ?? '') === 'md') {
+        if ($result && empty($result['error']) && ($_GET['format'] ?? '') === 'md' && !KSC_LITE) {
             $h = preg_replace('/[^a-z0-9.-]/i', '', ksc_host($result));
             header('Content-Type: text/markdown; charset=UTF-8');
             header('Content-Disposition: attachment; filename="kseccheck-' . $h . '-' . date('Ymd', (int)$result['checked_at']) . '.md"');
@@ -219,7 +220,7 @@ if ($authed && $url_in !== '' && !$share) {
             exit;
         }
         // 結果は番号付きのページで見せる（共有も印刷もそのURLで）
-        if ($result && empty($result['error']) && !empty($result['token']) && ($_GET['format'] ?? '') !== 'md') {
+        if ($result && empty($result['error']) && !empty($result['token']) && (KSC_LITE || ($_GET['format'] ?? '') !== 'md')) {
             header('Location: ' . ksc_self() . '?r=' . $result['token'] . '&new=1');
             exit;
         }
@@ -363,11 +364,11 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
     <img class="mascot" src="ksc_assets/mascot.png" alt="Kurage" width="110" height="110">
     <div>
       <h1><?= $is_result ? ksc_h(ksc_host($result)) . ' のセキュリティ診断結果' : 'URLを入れるだけで、ホームページの守りを診断' ?></h1>
-      <p class="lead"><?= $is_result ? '外から見える守りの弱さを、重い順に並べました（' . ksc_h(date('Y年n月j日 H:i', (int)$result['checked_at'])) . '時点）。' : 'https と証明書、ブラウザへの守りの指示、PHP・WordPress・jQuery などの古い版、入力欄の送り先を調べ、直し方を重い順に出します。' ?></p>
+      <p class="lead"><?= $is_result ? (KSC_LITE ? '外から見える守りを、4つの分野の点数と見つかった件数にまとめました（' : '外から見える守りの弱さを、重い順に並べました（') . ksc_h(date('Y年n月j日 H:i', (int)$result['checked_at'])) . '時点）。' : 'https と証明書、ブラウザへの守りの指示、PHP・WordPress・jQuery などの古い版、入力欄の送り先を調べ、' . (KSC_LITE ? '点数と見つかった件数を出します。' : '直し方を重い順に出します。') ?></p>
     </div>
   </div>
   <?php // 共有・コピーは、システム名と概要の文をURLと一緒に渡す（URLだけでは何のページか伝わらない）
-  $ptext = $is_result ? ksc_share_text($result) : '【' . KSC_TITLE . "】\nURLを入れるだけで、ホームページの外から見える守りを診断するシステムです。https と証明書、ブラウザへの守りの設定、古いPHP・WordPress・jQuery、入力欄の送り先を調べ、直し方を重い順に出します。" . (ksc_pro_status() ? "\n" . ksc_pro_summary_line() : '') . "\n#セキュリティ #情報漏洩対策";
+  $ptext = $is_result ? ksc_share_text($result) : '【' . KSC_TITLE . "】\nURLを入れるだけで、ホームページの外から見える守りを診断するシステムです。https と証明書、ブラウザへの守りの設定、古いPHP・WordPress・jQuery、入力欄の送り先を調べ、" . (KSC_LITE ? '点数と見つかった件数を出します。' : '直し方を重い順に出します。') . (ksc_pro_status() ? "\n" . ksc_pro_summary_line() : '') . "\n#セキュリティ #情報漏洩対策";
   $purl = $page_url; ?>
   <div class="pshare">
     <a class="btn xb" target="_blank" rel="noopener" href="https://x.com/intent/post?<?= ksc_h(http_build_query(['text' => $ptext, 'url' => $purl . '#ref=x-share-ksc'])) ?>">𝕏 Xで共有</a>
@@ -404,6 +405,9 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
 
   <?php if (function_exists('ksc_demo_after_score')) { echo ksc_demo_after_score($result, !isset($_GET['new'])); } ?>
 
+<?php if (KSC_LITE): ?>
+  <div class="box"><b>デモ版のため、点数と件数の概要だけを表示しています。</b>どの項目が問題か、実測の値、直し方、診断書（Markdown）のダウンロードは、導入版でお使いいただけます。</div>
+<?php else: ?>
   <h2>直すこと（重い順）</h2>
   <div class="list">
     <?php foreach ($result['findings'] as $x): ?>
@@ -412,9 +416,12 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
         <div class="a">直し方：<?= ksc_h($x['fix']) ?></div></div>
     <?php endforeach; if (!$result['findings']): ?><div class="item">外から見える範囲では、大きな問題は見つかりませんでした。</div><?php endif; ?>
   </div>
+<?php endif; ?>
 
   <?php $fa = $result['facts']; ?>
   <?= ksc_pro_section($result, $pro_vmsg) ?>
+
+<?php if (!KSC_LITE): ?>
 
   <h2>見えた情報</h2>
   <div class="box facts">
@@ -423,6 +430,7 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
     <div><b>作り：</b><?= ksc_h(($fa['wordpress'] ?? false) ? 'WordPress' : '') ?><?= ksc_h(implode('・', $fa['generator'] ?? [])) ?: '（判別できる表示なし）' ?></div>
     <div><b>読み込んでいるスクリプト：</b><?= (int)($fa['scripts'] ?? 0) ?>件<?= !empty($fa['external_script_hosts']) ? '（外部：' . ksc_h(implode('・', array_slice($fa['external_script_hosts'], 0, 6))) . '）' : '' ?></div>
   </div>
+<?php endif; ?>
   <p class="note">この診断は、ふつうの訪問者がページを開くのと同じ範囲だけを見ています。サーバーの中の設定、プラグインごとの脆弱性、パスワードの強さ、社内のネットワークは見ていません。点数が高くても、安全が保証されたという意味ではありません。</p>
 
   <?php $rurl = ksc_base_url() . '?r=' . $result['token']; $stext = ksc_share_text($result); ?>
@@ -439,7 +447,7 @@ footer{margin-top:40px;padding:20px 0;border-top:1px solid var(--line);font-size
   </div>
 
   <div class="actions">
-    <a class="btn main" href="<?= ksc_h($self) ?>?url=<?= rawurlencode($result['url']) ?>&amp;format=md">診断書（Markdown）をダウンロード</a>
+    <?php if (!KSC_LITE): ?><a class="btn main" href="<?= ksc_h($self) ?>?url=<?= rawurlencode($result['url']) ?>&amp;format=md">診断書（Markdown）をダウンロード</a><?php endif; ?>
     <button class="btn" type="button" onclick="window.print()">印刷・PDFで保存</button>
     <form class="js-run" method="post" action="<?= ksc_h($self) ?>?url=<?= rawurlencode($result['url']) ?>" style="display:inline"><input type="hidden" name="again" value="1"><button class="btn" type="submit">いま測り直す</button></form>
   </div>

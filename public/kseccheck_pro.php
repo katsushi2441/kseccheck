@@ -195,6 +195,10 @@ function ksc_pro_section(array $result, ?array $vmsg): string
         $o .= '<div class="cat"><span>照合した部品</span><b>' . count((array)($p['js'] ?? [])) . '</b></div>';
         $o .= '<div class="cat"><span>照合したプラグイン</span><b>' . count((array)($p['wordpress'] ?? [])) . '</b></div>';
         $o .= '</div></div>';
+        if (KSC_LITE) {
+            $o .= '<p class="note">Pro の点検で見つかった件数：' . count((array)$p['findings']) . '件（項目と直し方は導入版・AI-IT顧問でお渡しします）</p>' . ksc_pro_oss_html();
+            return $o . '</section>';
+        }
         $o .= '<div class="list">';
         foreach ((array)$p['findings'] as $x) {
             $o .= '<div class="item"><div class="t"><span class="tag ' . $e($x['sev']) . '">' . $e($sev[$x['sev']] ?? $x['sev']) . '</span><span class="tag cat2">' . $e($cat[$x['cat']] ?? $x['cat']) . '</span>' . $e($x['title']) . '</div>'
