@@ -36,9 +36,12 @@ function ksc_demo_after_score(array $r, bool $visitor): string
     $h = '外から見える守りは整っています。次は中の点検です';
     $lead = 'この診断で見えるのは外側だけです。サーバーの中の設定、WordPressのプラグイン、PHPの版、バックアップまで、AI-IT顧問で点検します。';
   }
-  $contact = 'https://exbridge.jp/contact.php?' . http_build_query(['ref' => $ref, 'subject' => 'AI-IT顧問（セキュリティの点検）について／診断：' . (string)parse_url((string)$r['url'], PHP_URL_HOST)]);
+  // いちばん目立つボタンは「詳しい結果を受け取る」＝点検の依頼（2026-11-02）。月額の顧問より一歩が小さい。
+  // contact.php?topic=shindan は件名【点検の依頼】で届き、url= が本文に入る
+  $contact = 'https://exbridge.jp/contact.php?' . http_build_query(['topic' => 'shindan', 'url' => (string)$r['url'], 'ref' => $ref, 'subject' => 'Security Check のデモで診断しました（' . (string)parse_url((string)$r['url'], PHP_URL_HOST) . '）。詳しい結果を受け取りたいです。']);
   return '<section class="cta-diag" aria-label="AI-IT顧問のご案内" style="background:#fff">'
     . '<h2>' . $e($h) . '</h2><p>' . $lead . '</p>'
-    . '<div class="actions"><a class="btn main" href="https://exbridge.jp/ai-it-komon.html#ref=' . $e($ref) . '">AI-IT顧問を見る</a>'
-    . '<a class="btn" href="' . $e($contact) . '">この結果について相談する</a></div></section>';
+    . '<div class="actions"><a class="btn main" href="' . $e($contact) . '">詳しい結果と直す点を受け取る</a>'
+    . '<a class="btn" href="https://exbridge.jp/ai-it-komon.html#ref=' . $e($ref) . '">AI-IT顧問を見る</a></div>'
+    . '<p style="font-size:13px;color:#52636b;margin:10px 0 0">どこを直せばよいかを、担当からメールでお知らせします。</p></section>';
 }
